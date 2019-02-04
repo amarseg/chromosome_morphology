@@ -1,19 +1,95 @@
 #######Function to read data and put it in a large table########
 library('tidyverse')
-chromosome_order <- c('chr_X','chr_III','chr_V')
 
 
 
-#####Test case################
-file_path <- 'Amalia/Wild Type/Early Pachytene/EP_MD_4_TIRF- Filtered_Channel Alignment_Statistics/'
-file_names <- list.files(file_path, full.names = T)
-
-chromosomes <- grep(file_names, pattern = 'Alignment_Dendrite', fixed = T, value = T)
-segments <- grep(file_names, pattern = 'Filament', fixed = T, value = T) %>%
-  select(-(str_detect()))
-parameter_name <- str_sub(basename(segments), start = 42, end = nchar(basename(segments)) - 4)
-
-chromosome_data <- segments %>%
-  map(read_csv, skip = 2) %>%
+unified_dataset_creator <- function(file_path, genotype, stage)
+{
+  chromosome_order <- c('chr_X','chr_III','chr_V')
   
-  reduce(cbind)
+  file_names <- list.files(file_path, full.names = T)
+  
+ #dendrites <- grep(file_names, pattern = 'Alignment_Dendrite', fixed = T, value = T)
+  segments <- grep(file_names, pattern = 'Filament', fixed = T, value = T)
+  
+  nu_segments <- grep(segments, pattern = 'Dendrite_Branches|Sholl_Intersections', value = T, invert = T)
+  
+  segment_data <- nu_segments %>%
+    map(read_csv,skip = 2) %>%
+    lapply(function(x){x[,c(1, ncol(x)-1)]}) %>%
+    reduce(full_join, by = c('ID' = 'ID')) 
+  
+  
+  #dendrite_data <- dendrites %>%
+    #map(read_csv,skip = 2) %>%
+    #lapply(function(x){x[,c(1, ncol(x)-2)]}) %>%
+    #reduce(full_join, by = c('FilamentID' = 'FilamentID'))
+  
+  chromosome_names <- rep(chromosome_order,nrow(segment_data)/3)
+  
+  #all_data <- inner_join(segment_data, dendrite_data, by = c('ID' = 'FilamentID')) %>%
+    #add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) %>%
+    #return()
+  t <- segment_data %>%
+    add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) %>%
+    return()
+    
+
+}
+
+wt_EP_1 <- unified_dataset_creator('Amalia/Wild Type/Early Pachytene/EP_MD_4_TIRF- Filtered_Channel Alignment_Statistics/',
+                                genotype = 'wt',
+                                stage = 'Early Pachytene')
+
+wt_EP_2 <- unified_dataset_creator('Amalia/Wild Type/Early Pachytene/MP-LP_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wt',
+                                   stage = 'Early Pachytene')
+
+wapl_EP_1 <- unified_dataset_creator('Amalia/Wapl-1/Early Pachytene/wapl_EP_LP3_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wapl',
+                                   stage = 'Early Pachytene')
+
+wapl_EP_2 <- unified_dataset_creator('Amalia/Wapl-1/Early Pachytene/wapl_EP_LP5_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wapl',
+                                   stage = 'Early Pachytene')
+
+wt_LP_1 <- unified_dataset_creator('Amalia/Wild Type/Late Pachytene/LP_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wt',
+                                   stage = 'Late Pachytene')
+
+wt_LP_2 <- unified_dataset_creator('Amalia/Wild Type/Late Pachytene/LP2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wt',
+                                   stage = 'Late Pachytene')
+
+wt_LP_3 <- unified_dataset_creator('Amalia/Wild Type/Late Pachytene/LP3_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wt',
+                                   stage = 'Late Pachytene')
+
+wt_LP_4 <- unified_dataset_creator('Amalia/Wild Type/Late Pachytene/LP9_TIRF- Filtered_Channel Alignment_Statistics/',
+                                   genotype = 'wt',
+                                   stage = 'Late Pachytene')
+
+
+wapl_LP_1 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP_LP3_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                     genotype = 'wapl',
+                                     stage = 'Late Pachytene')
+
+wapl_LP_2 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP_LP4_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                     genotype = 'wapl',
+                                     stage = 'Late Pachytene')
+wapl_LP_3 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP_LP5_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                     genotype = 'wapl',
+                                     stage = 'Late Pachytene')
+wapl_LP_4 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP2_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                     genotype = 'wapl',
+                                     stage = 'Late Pachytene')
+wapl_LP_5 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP2_2_TIRF- Filtered_Channel Alignment_Statistics/',
+                                     genotype = 'wapl',
+                                     stage = 'Late Pachytene')
+
+
+combined_dataset <- bind_rows(wt_EP_1,wt_EP_2,
+                              wapl_EP_1, wapl_EP_2, 
+                              wt_LP_1,wt_LP_2,wt_LP_3,wt_LP_4, 
+                              wapl_LP_1,wapl_LP_2,wapl_LP_3,wapl_LP_4,wapl_LP_5) %>%
+  write_csv('all_data.txt')
