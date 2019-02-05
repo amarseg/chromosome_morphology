@@ -9,7 +9,7 @@ unified_dataset_creator <- function(file_path, genotype, stage)
   
   file_names <- list.files(file_path, full.names = T)
   
- #dendrites <- grep(file_names, pattern = 'Alignment_Dendrite', fixed = T, value = T)
+ dendrites <- grep(file_names, pattern = 'Alignment_Dendrite', fixed = T, value = T)
   segments <- grep(file_names, pattern = 'Filament', fixed = T, value = T)
   
   nu_segments <- grep(segments, pattern = 'Dendrite_Branches|Sholl_Intersections', value = T, invert = T)
@@ -20,20 +20,23 @@ unified_dataset_creator <- function(file_path, genotype, stage)
     reduce(full_join, by = c('ID' = 'ID')) 
   
   
-  #dendrite_data <- dendrites %>%
-    #map(read_csv,skip = 2) %>%
-    #lapply(function(x){x[,c(1, ncol(x)-2)]}) %>%
-    #reduce(full_join, by = c('FilamentID' = 'FilamentID'))
+  dendrite_data <- dendrites %>%
+    map(read_csv,skip = 2) %>%
+    lapply(function(x){x[,c(1, ncol(x)-2,ncol(x)-1)]}) %>%
+    reduce(full_join, by = c('ID' = 'ID'))
   
   chromosome_names <- rep(chromosome_order,nrow(segment_data)/3)
   
-  #all_data <- inner_join(segment_data, dendrite_data, by = c('ID' = 'FilamentID')) %>%
-    #add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) %>%
-    #return()
-  t <- segment_data %>%
-    add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) %>%
-    return()
+  all_segment <- segment_data %>%
+    add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) 
     
+  all_dendrite <- dendrite_data %>%
+    add_column(genotype = genotype, stage = stage) %>%
+    select(-contains('.x.')) %>%
+    select(-contains('.y'))
+    
+  
+  return(list(all_segment, all_dendrite))
 
 }
 
@@ -87,9 +90,15 @@ wapl_LP_5 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP2_2_TI
                                      genotype = 'wapl',
                                      stage = 'Late Pachytene')
 
+filament_dataset <- bind_rows(wt_EP_1[[1]],wt_EP_2[[1]],
+                              wapl_EP_1[[1]], wapl_EP_2[[1]], 
+                              wt_LP_1[[1]],wt_LP_2[[1]],wt_LP_3[[1]],wt_LP_4[[1]], 
+                              wapl_LP_1[[1]],wapl_LP_2[[1]],wapl_LP_3[[1]],wapl_LP_4[[1]],wapl_LP_5[[1]]) %>%
+  write_csv('all_filaments.csv')
 
-combined_dataset <- bind_rows(wt_EP_1,wt_EP_2,
-                              wapl_EP_1, wapl_EP_2, 
-                              wt_LP_1,wt_LP_2,wt_LP_3,wt_LP_4, 
-                              wapl_LP_1,wapl_LP_2,wapl_LP_3,wapl_LP_4,wapl_LP_5) %>%
-  write_csv('all_data.txt')
+
+dendrite_dataset <- bind_rows(wt_EP_1[[2]],wt_EP_2[[2]],
+                              wapl_EP_1[[2]], wapl_EP_2[[2]], 
+                              wt_LP_1[[2]],wt_LP_2[[2]],wt_LP_3[[2]],wt_LP_4[[2]], 
+                              wapl_LP_1[[2]],wapl_LP_2[[2]],wapl_LP_3[[2]],wapl_LP_4[[2]],wapl_LP_5[[2]]) %>%
+  write_csv('all_dendrites.csv')
