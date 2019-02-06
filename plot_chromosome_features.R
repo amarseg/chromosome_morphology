@@ -3,7 +3,7 @@ library(ggpubr)
 library(gridExtra)
 
 chromosome_data <- read_csv('all_filaments.csv') %>%
-  select(-'ID')
+  select(-'ID', -file)
 
 variable_name <- colnames(chromosome_data[1:22])
 

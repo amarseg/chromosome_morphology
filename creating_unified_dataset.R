@@ -27,11 +27,19 @@ unified_dataset_creator <- function(file_path, genotype, stage)
   
   chromosome_names <- rep(chromosome_order,nrow(segment_data)/3)
   
+  #get file name to then merge dendrites and filaments, it can come from any of the output files
+  pic_name <- str_split(basename(dendrites[1]), pattern = '-')[[1]][1]
+  
   all_segment <- segment_data %>%
-    add_column(genotype = genotype, stage = stage, chromosome = chromosome_names) 
+    add_column(genotype = genotype,
+               stage = stage, 
+               chromosome = chromosome_names,
+               file = pic_name) 
     
   all_dendrite <- dendrite_data %>%
-    add_column(genotype = genotype, stage = stage) %>%
+    add_column(genotype = genotype,
+               stage = stage,
+               file = pic_name) %>%
     select(-contains('.x.')) %>%
     select(-contains('.y'))
     
@@ -86,7 +94,7 @@ wapl_LP_3 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP_LP5_2
 wapl_LP_4 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP2_2_TIRF- Filtered_Channel Alignment_Statistics/',
                                      genotype = 'wapl',
                                      stage = 'Late Pachytene')
-wapl_LP_5 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_EP2_2_TIRF- Filtered_Channel Alignment_Statistics/',
+wapl_LP_5 <- unified_dataset_creator('Amalia/Wapl-1/Late Pachytene/wapl_LP5_TIRF- Filtered_Channel Alignment_Statistics/',
                                      genotype = 'wapl',
                                      stage = 'Late Pachytene')
 

@@ -1,17 +1,21 @@
+rm(list = ls())
 library(tidyverse)
 library(ggpubr)
 library(gridExtra)
 
 dendrites_data <- read_csv('all_dendrites.csv') 
+chromosome_data <- read_csv('all_filaments.csv') 
 
-chromosome_data <- read_csv('all_filaments.csv') %>%
-  select(-'ID')
 
-variable_name <- colnames(chromosome_data[1:22])
+annot_dendrites <- inner_join(dendrites_data, chromosome_data, by= c('file' = 'file', 
+                                                                    'FilamentID' = 'ID',
+                                                                    'stage' = 'stage',
+                                                                    'genotype' = 'genotype')) %>%
+  group_by(file, FilamentID, stage, genotype) %>%
+  mutate(segment_n = 1:n())
+  
 
-avgs <- chromosome_data %>%
-  group_by(genotype, stage, chromosome) %>%
-  summarise_all(mean)
+
 
 for(variable in variable_name)
 {
