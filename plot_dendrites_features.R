@@ -12,37 +12,20 @@ annot_dendrites <- inner_join(dendrites_data, chromosome_data, by= c('file' = 'f
                                                                     'stage' = 'stage',
                                                                     'genotype' = 'genotype')) %>%
   group_by(file, FilamentID, stage, genotype) %>%
-  mutate(segment_n = 1:n())
-  
+  mutate(segment_n = 1:n()) %>%
+  filter(stage == 'Late Pachytene') %>%
+  mutate(segment_ratio = `Dendrite Length`/`Filament Length (sum)`)
+
+ggplot(annot_dendrites, aes(y = segment_ratio, x = chromosome, fill = genotype))+
+  geom_boxplot() +
+  facet_wrap(~segment_n) +
+  stat_compare_means( label ="p.signif")
 
 
+ggplot(filter(annot_dendrites, segment_n == 1), aes(x = segment_ratio, fill = genotype))+
+  geom_histogram(aes(y = ..density..),position = "dodge") +
+  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
 
-for(variable in variable_name)
-{
-  
-  p1 <- ggplot(chromosome_data, aes_(as.name(variable)), aes(group = genotype)) +
-    geom_density(alpha = 0.8,aes(group = genotype)) +
-    facet_wrap(~stage*chromosome) +
-    theme_light() +
-    geom_histogram(aes(y = ..density.., fill = genotype), alpha = 0.8,position = "dodge") 
-  
-  
-  p2 <- ggplot(chromosome_data, aes_(y = as.name(variable), x = as.name('chromosome'), fill = as.name('genotype'))) +
-    geom_boxplot() +
-    theme_light() +
-    facet_wrap(~stage) +
-    stat_compare_means( label ="p.signif")
-  
-  p3 <- ggplot(chromosome_data, aes_(y = as.name(variable), x = as.name('genotype'), fill = as.name('stage'))) +
-    geom_boxplot() +
-    theme_light() +
-    facet_wrap(~chromosome) +
-    stat_compare_means( label ="p.signif") +
-    scale_fill_brewer(palette = 'Set2')
-  
-  
-  plot_list <- list(p1,p2,p3)
-  
-  ggsave(paste0('Plots/',variable, '.pdf'), marrangeGrob(grobs = plot_list, nrow = 1, ncol = 1))
-  
-}
+ggplot(filter(annot_dendrites, segment_n == 1), aes(x = segment_ratio, fill = genotype))+
+  geom_density(alpha = 0.75) +
+  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
