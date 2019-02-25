@@ -2,7 +2,7 @@ library(tidyverse)
 library(ggpubr)
 library(gridExtra)
 
-chromosome_data <- read_csv('all_filaments.csv') %>%
+chromosome_data <- read_csv('all_filaments_2.csv') %>%
   select(-'ID', -file)
 
 variable_name <- colnames(chromosome_data[1:22])
@@ -37,6 +37,6 @@ for(variable in variable_name)
   
   plot_list <- list(p1,p2,p3)
   
-  ggsave(paste0('Plots/',variable, '.pdf'), marrangeGrob(grobs = plot_list, nrow = 1, ncol = 1))
+  ggsave(paste0('Plots/dataset_2/',variable, '.pdf'), marrangeGrob(grobs = plot_list, nrow = 1, ncol = 1))
   
 }
