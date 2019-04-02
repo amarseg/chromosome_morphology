@@ -6,7 +6,6 @@ import pandas as pd
 from scipy.spatial import ConvexHull
 import seaborn as sns
 import nestle
-
 ########################
 #Functions
 ##########################
@@ -137,33 +136,5 @@ def load_data():
     chr_order = ['chr_X','chr_III','chr_V']
 
     df_out.sort_values(['Filename', 'Ids'])
-    df_out['Chromosome'] = chr_order * 221
-    df_out.to_csv('py_output.csv')
+    df_out['Chromosome'] = np.repeat(chr_order, len(df_out)/3)
     return df_out
-
-#########################
-#Plotting and analysing data
-###########################
-df_out = load_data()
-print(len(df_out))
-t = add_volume_and_hull(df_out)
-#plot_ellipsoid(exp_data.iloc[1])
-print(t['Genotype'])
-sns.swarmplot(x="Genotype", y="Volume", palette=["r", "c", "y"], data=t)
-plt.show()
-
-sns.boxplot(x='Chromosome', y='Volume', hue='Genotype',
-            palette='Set3', data=t)
-plt.show()
-
-sns.catplot(x="Chromosome", y="Volume",
-            hue="Genotype", col="Stage",
-            data=t, kind="box",
-            height=4, aspect=.7);
-plt.show()
-
-sns.catplot(x="Chromosome", y="Volume",
-            hue="Stage", col="Genotype",
-            data=t, kind="box",
-            height=4, aspect=.7);
-plt.show()
