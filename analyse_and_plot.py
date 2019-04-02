@@ -94,13 +94,24 @@ def add_volume_and_hull(df):
     positions = np.array(df['Positions'])
     convex_hull = []
     volume = []
+    grad1 = []
+    grad2 = []
+    grad3 = []
     for elmnt in positions:
         poly = ConvexHull(elmnt)
         volume.append(poly.volume)
         convex_hull.append(poly)
+        g = np.gradient(elmnt)
+        grad1.append(g[0])
+        grad2.append(g[1])
+        g_g = np.gradient(g)
+        grad3.append(g_g[0])
 
     df['Hull'] = convex_hull
     df['Volume'] = volume
+    df['Gradient_1'] = grad1
+    df['Gradient_2'] = grad2
+    df['Gradient_3'] = grad3
 
     return df
 #########################
@@ -141,6 +152,7 @@ def load_data():
     df_out.to_csv('py_output.csv')
     return df_out
 
+
 #########################
 #Plotting and analysing data
 ###########################
@@ -167,3 +179,13 @@ sns.catplot(x="Chromosome", y="Volume",
             data=t, kind="box",
             height=4, aspect=.7);
 plt.show()
+shapes = []
+for element in t['Positions']:
+    x_ax = np.array(element).shape[0]
+    shapes.append(list(range(0,x_ax)))
+t['X_axis'] = range(0, len(t['Positions']))
+t['X_axis'] = shapes
+# print(t)
+# sns.relplot(x='X_axis', y="Gradient_3", hue='Chromosome', col='Genotype',
+#             height=5, aspect=.75, facet_kws=dict(sharex=False),
+#             kind="line", data=t)
