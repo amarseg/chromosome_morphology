@@ -7,6 +7,7 @@ from scipy.spatial import ConvexHull
 import seaborn as sns
 import nestle
 
+
 ########################
 #Functions
 ##########################
@@ -66,24 +67,25 @@ def plot_ellipsoid(experiment_row):
     ax.set_zlabel("Z")
     plt.show()
 
-def plot_convex_hull(experiment_row):
+def plot_convex_hull(experiment_df, exp_id, convex = False):
     fig = plt.figure()
 
     ax = fig.add_subplot(111, projection='3d')
     ax.set_aspect("equal")
 
-    for fil in experiment_row['Positions']:
+    subset = experiment_df.loc[experiment_df['Filename'] == 'EP_MD_4_TIRF- Filtered_Channel Alignment']
+
+    for fil in subset['Positions']:
         fil = np.array(fil)
         hull = ConvexHull(fil)
         ax.plot(fil.T[0], fil.T[1], fil.T[2], "ko")
 
-        # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
-        for s in hull.simplices:
-            s = np.append(s, s[0])  # Here we cycle back to the first coordinate
-            ax.plot(fil[s, 0], fil[s, 1], fil[s, 2], "r-", alpha=0.2)
+        if convex:
+            # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
+            for s in hull.simplices:
+                s = np.append(s, s[0])  # Here we cycle back to the first coordinate
+                ax.plot(fil[s, 0], fil[s, 1], fil[s, 2], "r-", alpha=0.2)
 
-
-    plt.show()
     ax.set_xlabel("X")
     ax.set_xlim(ax.get_xlim()[::-1])
     ax.set_ylabel("Y")
@@ -114,6 +116,16 @@ def add_volume_and_hull(df):
     df['Gradient_3'] = grad3
 
     return df
+
+def calculate_length_origin(df):
+    positions = np.array(df['Positions'])
+    for fil in positions:
+        start = fil[0]
+        end = fil[1]
+        dist_start_end = sum(np.diff(start, end) ** 2)
+
+        dist_all = sum(np.diff(fil))
+
 #########################
 #Import and tidy experiment data
 ###########################
@@ -157,34 +169,36 @@ def load_data():
 #Plotting and analysing data
 ###########################
 df_out = load_data()
-print(len(df_out))
 t = add_volume_and_hull(df_out)
+#test = calculate_bounding_boxes(t)
 #plot_ellipsoid(exp_data.iloc[1])
-print(t['Genotype'])
+plt.figure(figsize=(16, 12))
 sns.swarmplot(x="Genotype", y="Volume", palette=["r", "c", "y"], data=t)
-plt.show()
+plt.savefig('fig_3d/Swarm_Volume_genotype.png')
 
 sns.boxplot(x='Chromosome', y='Volume', hue='Genotype',
             palette='Set3', data=t)
-plt.show()
+plt.savefig('fig_3d/Volume_genotype.png')
 
 sns.catplot(x="Chromosome", y="Volume",
             hue="Genotype", col="Stage",
             data=t, kind="box",
-            height=4, aspect=.7);
-plt.show()
+            height=10, aspect=.7)
+plt.savefig('fig_3d/Volume_stage.png')
 
 sns.catplot(x="Chromosome", y="Volume",
             hue="Stage", col="Genotype",
-            data=t, kind="box",
-            height=4, aspect=.7);
-plt.show()
+            data=t, kind="box", palette = 'Set2',
+            height=10, aspect=.7)
+plt.savefig('fig_3d/facet_Volume_stage.png')
 shapes = []
 for element in t['Positions']:
     x_ax = np.array(element).shape[0]
     shapes.append(list(range(0,x_ax)))
 t['X_axis'] = range(0, len(t['Positions']))
 t['X_axis'] = shapes
+
+plot_convex_hull(df_out, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
 # print(t)
 # sns.relplot(x='X_axis', y="Gradient_3", hue='Chromosome', col='Genotype',
 #             height=5, aspect=.75, facet_kws=dict(sharex=False),

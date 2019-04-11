@@ -1,33 +1,109 @@
 ---
-title: "meeting_february"
+title: "meeting_april"
 output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(ggpubr)
 ```
 
-## R Markdown
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+##Length comparison between genotypes
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+chromosome_data <- read_csv('all_filaments_2.csv') %>%
+  select(-'ID', -file)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+ggplot(chromosome_data, aes(y = `Filament Length (sum)`, x =chromosome, fill = genotype)) +
+      geom_boxplot() +
+      theme_light() +
+      facet_wrap(~stage) +
+      stat_compare_means( label ="p.signif")
 
-## Slide with Bullets
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-## Slide with R Output
-
-```{r cars, echo = TRUE}
-summary(cars)
 ```
 
-## Slide with Plot
-
-```{r pressure}
-plot(pressure)
+##Length comparison between stages
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+ggplot(chromosome_data, aes(y = `Filament Length (sum)`, x = genotype, fill = stage)) +
+    geom_boxplot() +
+    theme_light() +
+    facet_wrap(~chromosome) +
+    stat_compare_means( label ="p.signif") +
+    scale_fill_brewer(palette = 'Set2')
 ```
 
+##Plot crossover position
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+dendrites_data <- read_csv('all_dendrites_2.csv') 
+chromosome_data <- read_csv('all_filaments_2.csv') 
+
+
+annot_dendrites <- inner_join(dendrites_data, chromosome_data, by= c('file' = 'file', 
+                                                                    'FilamentID.x' = 'ID',
+                                                                    'stage' = 'stage',
+                                                                    'genotype' = 'genotype')) %>%
+  group_by(file, FilamentID.x, stage, genotype) %>%
+  mutate(segment_n = 1:n()) %>%
+  filter(stage == 'Late Pachytene') %>%
+  mutate(segment_ratio = `Dendrite Length`/`Filament Length (sum)`)
+
+ggplot(filter(annot_dendrites, segment_n == 1), aes(x = segment_ratio, fill = genotype))+
+  geom_histogram(aes(y = ..density..),position = "dodge") +
+  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
+```
+
+##Binning crossover data
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+binned_things <- annot_dendrites %>%
+  group_by(genotype, chromosome) %>%
+  mutate(bin = ntile(`Filament Length (sum)`,2)) %>%
+  ungroup()
+
+ggplot(binned_things, aes(x = segment_ratio, fill = genotype)) +
+  geom_histogram(aes(y = ..density..),position = "dodge") +
+  facet_wrap(~bin*chromosome) 
+```
+
+##Binning crossover data
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+ggplot(binned_things, aes(x = segment_ratio, fill = as.factor(bin))) +
+  geom_density(aes(y = ..density..),position = "dodge", alpha = 0.75) +
+  facet_wrap(~genotype*chromosome) 
+
+```
+
+##Number of edges per chromosome
+```{r,echo = FALSE, warning=FALSE, message=FALSE }
+test_data <- chromosome_data %>%
+  mutate(edges_per_length = `Filament No. Edges`/`Filament Length (sum)`)
+
+ggplot(test_data, aes(y = edges_per_length, x = genotype, fill = stage)) +
+  geom_boxplot() +
+  theme_light() +
+  facet_wrap(~chromosome) +
+  stat_compare_means( label ="p.signif") +
+  scale_fill_brewer(palette = 'Set2')
+```
+
+##Number of edges per chromosome
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+ggplot(test_data, aes(y = edges_per_length, x = chromosome, fill = genotype)) +
+  geom_boxplot() +
+  theme_light() +
+  facet_wrap(~stage) +
+  stat_compare_means( label ="p.signif") 
+
+```
+
+##Volume
+```{r,echo = FALSE, warning = FALSE, message=FALSE }
+knitr::include_graphics('fig_3d/Volume_stage.png')
+
+```
+
+##Volume
+```{r,echo = FALSE, warning = FALSE, message=FALSE }
+knitr::include_graphics('fig_3d/facet_Volume_stage.png')
+
+```

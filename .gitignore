@@ -7,5 +7,7 @@ Amalia/
 Plots/
 DATASET_2/
 Jaso_data/
+fig_3d/
 
 *.csv
+*.pdf
