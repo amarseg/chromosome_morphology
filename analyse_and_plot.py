@@ -126,10 +126,11 @@ def calculate_total_distance(df):
     positions = np.array(df['Positions'])
     distances = []
     for fil in positions:
+        ind_dist = []
         for n in range(0,len(fil)-1):
             d = calculate_distance(fil[n], fil[n+1])
-
-        total_distance = sum(distances)
+            ind_dist.append(d)
+        total_distance = sum(ind_dist)
         distances.append(total_distance)
     return total_distance
 

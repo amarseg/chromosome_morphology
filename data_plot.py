@@ -80,8 +80,16 @@ plt.savefig('fig_3d/facet_Volume_stage.png')
 sns.catplot(x="Chromosome", y="Compaction_ratio",
             hue="Stage", col="Genotype",
             data=t, kind="box", palette = 'Set2',
-            height=10, aspect=.7)
+            height=10, aspect=.7, showfliers=False)
 
 plt.savefig('fig_3d/facet_compact_stage.png')
+
+sns.catplot(x="Chromosome", y="Compaction_ratio",
+            hue="Genotype", col="Stage",
+            data=t, kind="box",
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_compact_genotype.png')
+
 plt.show()
 plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
