@@ -6,8 +6,8 @@ import pandas as pd
 from scipy.spatial import ConvexHull
 import seaborn as sns
 import nestle
-
-
+import math
+import vg
 ########################
 #Functions
 ##########################
@@ -117,14 +117,46 @@ def add_volume_and_hull(df):
 
     return df
 
+def calculate_distance(p1, p2):
+    differ = np.array(p1) - np.array(p2)
+    dist = math.sqrt(sum(differ)**2)
+    return dist
+
+def calculate_total_distance(df):
+    positions = np.array(df['Positions'])
+    distances = []
+    for fil in positions:
+        for n in range(0,len(fil)-1):
+            d = calculate_distance(fil[n], fil[n+1])
+
+        total_distance = sum(distances)
+        distances.append(total_distance)
+    return total_distance
+
+def angle_calculation(df):
+    positions = np.array(df['Positions'])
+    angles = []
+    for fil in positions:
+        todo = []
+        for n in range(0,len(fil)-2):
+            v0 = np.array(fil[n]) - np.array(fil[n+1])
+            v1 = np.array(fil[n+1]) - np.array(fil[n+2])
+            # angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+            # angle_deg = np.degree(angle_deg)
+            angle = vg.angle(v0,v1)
+            todo.append(angle)
+        angles.append(todo)
+    return angles
+
 def calculate_length_origin(df):
     positions = np.array(df['Positions'])
+    start_end_dist = []
     for fil in positions:
-        start = fil[0]
-        end = fil[1]
-        dist_start_end = sum(np.diff(start, end) ** 2)
-
-        dist_all = sum(np.diff(fil))
+        start = np.array(fil[0])
+        end = np.array(fil[-1])
+        start_end = calculate_distance(start, end)
+        start_end_dist.append(start_end)
+    return start_end_dist
 
 #########################
 #Import and tidy experiment data
@@ -170,36 +202,20 @@ def load_data():
 ###########################
 df_out = load_data()
 t = add_volume_and_hull(df_out)
-#test = calculate_bounding_boxes(t)
-#plot_ellipsoid(exp_data.iloc[1])
-plt.figure(figsize=(16, 12))
-sns.swarmplot(x="Genotype", y="Volume", palette=["r", "c", "y"], data=t)
-plt.savefig('fig_3d/Swarm_Volume_genotype.png')
+print('Added volume and convex hull polygon to dataset')
 
-sns.boxplot(x='Chromosome', y='Volume', hue='Genotype',
-            palette='Set3', data=t)
-plt.savefig('fig_3d/Volume_genotype.png')
+total_distance = calculate_total_distance(t)
+t['Total_distance'] = total_distance
+print('Total Distance calculated and added to dataset')
 
-sns.catplot(x="Chromosome", y="Volume",
-            hue="Genotype", col="Stage",
-            data=t, kind="box",
-            height=10, aspect=.7)
-plt.savefig('fig_3d/Volume_stage.png')
+d_start_end = calculate_length_origin(t)
+t['Start_end_distance'] = d_start_end
+t['Compaction_ratio'] = t['Total_distance']/t['Start_end_distance']
+print('Distance between start and end of filament, plus compaction ratio added')
 
-sns.catplot(x="Chromosome", y="Volume",
-            hue="Stage", col="Genotype",
-            data=t, kind="box", palette = 'Set2',
-            height=10, aspect=.7)
-plt.savefig('fig_3d/facet_Volume_stage.png')
-shapes = []
-for element in t['Positions']:
-    x_ax = np.array(element).shape[0]
-    shapes.append(list(range(0,x_ax)))
-t['X_axis'] = range(0, len(t['Positions']))
-t['X_axis'] = shapes
+angles = angle_calculation(t)
+t['Angles'] = angles
+print('Added angles between points')
 
-plot_convex_hull(df_out, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
-# print(t)
-# sns.relplot(x='X_axis', y="Gradient_3", hue='Chromosome', col='Genotype',
-#             height=5, aspect=.75, facet_kws=dict(sharex=False),
-#             kind="line", data=t)
+t.to_csv('processed_data.csv')
+print('Dataset saved')

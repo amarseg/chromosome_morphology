@@ -28,7 +28,7 @@ ggplot(filter(annot_dendrites, segment_n == 1), aes(x = segment_ratio, fill = ge
 
 ggplot(filter(annot_dendrites, segment_n == 1), aes(x = segment_ratio, fill = genotype))+
   geom_density(alpha = 0.75) +
-  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
+  facet_wrap(~genotype*chromosome, nrow = 2, ncol = 3) 
 
 ggplot(filter(annot_dendrites, segment_n ==1), aes(x = segment_ratio, y = `Filament Length (sum)`,
                                                    color = chromosome)) +
@@ -48,4 +48,54 @@ ggplot(test_data, aes(y = edges_per_length, x = chromosome, fill = genotype)) +
   geom_boxplot() +
   theme_light() +
   facet_wrap(~stage) +
-  stat_compare_means( label ="p.signif") 
+  stat_compare_means( label ="p.signif")
+
+chr_x <- chromosome_data %>%
+  filter(chromosome == 'chr_X') %>%
+  arrange(ID) %>%
+  select(ID, file, stage, `Filament Length (sum)`, genotype)
+
+chr_iii <- chromosome_data %>%
+  filter(chromosome == 'chr_III')   %>%
+  arrange(ID) %>%
+  select(ID, file, stage, `Filament Length (sum)`)
+
+chr_v <- chromosome_data %>%
+  filter(chromosome == 'chr_V')   %>%
+  arrange(ID) %>%
+  select(ID, file, stage, `Filament Length (sum)`)
+
+t <- bind_cols(chr_x, chr_iii, chr_v)
+
+
+p1<-ggplot(t, aes(x = `Filament Length (sum)`, y =  `Filament Length (sum)1`, group = genotype)) +
+  geom_point(aes(color = stage)) +
+  geom_smooth(method = 'lm', colour = 'black') +
+  xlab('Chromosome X length') +
+  ylab('Chromosome III length') +
+  scale_colour_brewer(palette = 'Set2') +
+  theme_bw() +
+  facet_wrap(~genotype) +
+  stat_cor(output.type = 'text')
+
+p2 <-ggplot(t, aes(x = `Filament Length (sum)1`, y =  `Filament Length (sum)2`)) +
+  geom_point(aes(color = stage)) +
+  geom_smooth(method = 'lm', colour = 'black') +
+  xlab('Chromosome III length') +
+  ylab('Chromosome V length') +
+  scale_colour_brewer(palette = 'Set2') +
+  theme_bw() +
+  facet_wrap(~genotype)  +
+  stat_cor(output.type = 'text')
+
+p3 <- ggplot(t, aes(x = `Filament Length (sum)`, y =  `Filament Length (sum)2`)) +
+  geom_point(aes(color = stage)) +
+  geom_smooth(method = 'lm', colour = 'black') +
+  xlab('Chromosome  X length') +
+  ylab('Chromosome V length') +
+  scale_colour_brewer(palette = 'Set2') +
+  theme_bw() +
+  facet_wrap(~genotype) +
+  stat_cor(output.type = 'text')
+
+grid.arrange(p1,p2,p3, ncol = 1, nrow = 3)
