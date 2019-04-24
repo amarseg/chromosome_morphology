@@ -132,11 +132,12 @@ def calculate_total_distance(df):
             ind_dist.append(d)
         total_distance = sum(ind_dist)
         distances.append(total_distance)
-    return total_distance
+    return distances
 
 def angle_calculation(df):
     positions = np.array(df['Positions'])
     angles = []
+    mean_angle = []
     for fil in positions:
         todo = []
         for n in range(0,len(fil)-2):
@@ -147,7 +148,9 @@ def angle_calculation(df):
             angle = vg.angle(v0,v1)
             todo.append(angle)
         angles.append(todo)
-    return angles
+        avg = np.median(todo)
+        mean_angle.append(avg)
+    return angles, mean_angle
 
 def calculate_length_origin(df):
     positions = np.array(df['Positions'])
@@ -158,6 +161,14 @@ def calculate_length_origin(df):
         start_end = calculate_distance(start, end)
         start_end_dist.append(start_end)
     return start_end_dist
+
+def add_x_axis(df):
+    x_axis = []
+    for index, row in df.iterrows():
+        indexes = list(range(1,len(row['Angles'])))
+        poses =  [x - row['Crossover'] for x in indexes]
+        x_axis.append(poses)
+    return x_axis
 
 #########################
 #Import and tidy experiment data
@@ -214,8 +225,13 @@ t['Start_end_distance'] = d_start_end
 t['Compaction_ratio'] = t['Total_distance']/t['Start_end_distance']
 print('Distance between start and end of filament, plus compaction ratio added')
 
-angles = angle_calculation(t)
+angles, mean_angle = angle_calculation(t)
 t['Angles'] = angles
+t['mean_angle'] = mean_angle
+
+x_axis = add_x_axis(t)
+t['x_axis'] = x_axis
+
 print('Added angles between points')
 
 t.to_csv('processed_data.csv')

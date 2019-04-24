@@ -91,5 +91,48 @@ sns.catplot(x="Chromosome", y="Compaction_ratio",
 
 plt.savefig('fig_3d/facet_compact_genotype.png')
 
-plt.show()
-plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
+sns.catplot(x="Chromosome", y="Total_distance",
+            hue="Genotype", col="Stage",
+            data=t, kind="box",
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_total_length_genotype.png')
+
+sns.catplot(x="Chromosome", y="Total_distance",
+            hue="Stage", col="Genotype",
+            data=t, kind="box", palette = 'Set2',
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_total_length_stage.png')
+
+sns.catplot(x="Chromosome", y="mean_angle",
+            hue="Genotype", col="Stage",
+            data=t, kind="box",
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_mean_angle_genotype.png')
+
+sns.catplot(x="Chromosome", y="mean_angle",
+            hue="Stage", col="Genotype",
+            data=t, kind="box", palette = 'Set2',
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_mean_angle_stage.png')
+
+#plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
+only_LP = t[t.Stage == 'LP']
+int_data = only_LP[['Genotype', 'Filename','Angles', 'x_axis', 'Chromosome']]
+lens = [len(item) for item in int_data['Angles']]
+df_out = pd.DataFrame( {"Filename" : np.repeat(int_data['Filename'].values,lens),
+                "Genotype" : np.repeat(int_data['Genotype'].values,lens),
+                "Chromosome" : np.repeat(int_data['Chromosome'].values,lens),
+               "Angles" : np.hstack(int_data['Angles']),
+               "x_axis" : np.hstack(int_data['x_axis'])
+              })
+#print(only_LP['Angles'])
+#print(only_LP['x_axis'])
+df_out.to_csv('test_csv.csv')
+# sns.relplot(data=df_out, x = 'x_axis', y = 'Angles',
+#              palette="tab10", linewidth=2.5, col="Genotype",
+#              hue = 'Chromosome')
+# plt.savefig('fig_3d/line_test.png')
