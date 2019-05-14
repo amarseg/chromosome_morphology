@@ -228,6 +228,7 @@ print('Distance between start and end of filament, plus compaction ratio added')
 angles, mean_angle = angle_calculation(t)
 t['Angles'] = angles
 t['mean_angle'] = mean_angle
+t['sum_angle'] = list(map(sum, t['Angles']))/t['Total_distance']
 
 x_axis = add_x_axis(t)
 t['x_axis'] = x_axis
