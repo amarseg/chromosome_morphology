@@ -53,6 +53,8 @@ def plot_convex_hull(experiment_df, exp_id, convex = False):
     ax.set_zlabel("Z")
     plt.show()
 
+
+
 #################
 #Actual plotting
 ####################
@@ -133,7 +135,6 @@ sns.catplot(x="Chromosome", y="sum_angle",
 
 plt.savefig('fig_3d/facet_sum_angle_stage.png')
 #plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
-# only_LP = t[t.Stage == 'LP']
 # int_data = only_LP[['Genotype', 'Filename','Angles', 'x_axis', 'Chromosome']]
 # lens = [len(item) for item in int_data['Angles']]
 # df_out = pd.DataFrame( {"Filename" : np.repeat(int_data['Filename'].values,lens),
@@ -149,3 +150,13 @@ plt.savefig('fig_3d/facet_sum_angle_stage.png')
 #              palette="tab10", linewidth=2.5, col="Genotype",
 #              hue = 'Chromosome')
 # plt.savefig('fig_3d/line_test.png')
+
+ep = pd.read_csv('processed_LP.csv')
+
+
+sns.catplot(x="Chromosome", y="Long_short_ratio",
+            hue="Genotype", col="Stage",
+            data=ep, kind="box",
+            height=10, aspect=.7, showfliers=False)
+
+plt.savefig('fig_3d/facet_long_short_genotype.png')

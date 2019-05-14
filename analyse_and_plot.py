@@ -134,6 +134,14 @@ def calculate_total_distance(df):
         distances.append(total_distance)
     return distances
 
+def filament_total_distance(fil):
+    ind_dist = []
+    for n in range(0,len(fil)-1):
+        d = calculate_distance(fil[n], fil[n+1])
+        ind_dist.append(d)
+    total_distance = sum(ind_dist)
+    return total_distance
+
 def angle_calculation(df):
     positions = np.array(df['Positions'])
     angles = []
@@ -170,6 +178,49 @@ def add_x_axis(df):
         x_axis.append(poses)
     return x_axis
 
+def split_angles_into_short_and_long(df):
+    positions = np.array(df['Angles'])
+    co_pos = np.array(df['Crossover']) - 1
+    short = []
+    long = []
+    for i in range(len(positions)):
+        pos = positions[i]
+        co = co_pos[i]
+        arm1 = list(pos[0:co])
+        arm2 = list(pos[co+1:len(pos)])
+        l_arm1 = len(arm1)
+        l_arm2 = len(arm2)
+
+        if(l_arm1 > l_arm2):
+            short.append(arm2)
+            long.append(arm1)
+        else:
+            short.append(arm1)
+            long.append(arm2)
+
+    return short, long
+
+def split_lengths_into_short_and_long(df):
+    positions = np.array(df['Positions'])
+    co_pos = np.array(df['Crossover'])
+    short = []
+    long = []
+    for i in range(len(positions)):
+        pos = positions[i]
+        co = co_pos[i]
+        arm1 = list(pos[0:co])
+        arm2 = list(pos[co+1:len(pos)])
+        l_arm1 = filament_total_distance(arm1)
+        l_arm2 = filament_total_distance(arm2)
+
+        if(l_arm1 > l_arm2):
+            short.append(l_arm2)
+            long.append(l_arm1)
+        else:
+            short.append(l_arm1)
+            long.append(l_arm2)
+
+    return short, long
 #########################
 #Import and tidy experiment data
 ###########################
@@ -208,7 +259,6 @@ def load_data():
     df_out.to_csv('py_output.csv')
     return df_out
 
-
 #########################
 #Plotting and analysing data
 ###########################
@@ -237,3 +287,17 @@ print('Added angles between points')
 
 t.to_csv('processed_data.csv')
 print('Dataset saved')
+
+only_LP = t[t.Stage == 'LP']
+
+short, long = split_angles_into_short_and_long(only_LP)
+only_LP['Short_angle'] = short
+only_LP['Long_angle'] = long
+short_l, long_l = split_lengths_into_short_and_long(only_LP)
+only_LP['Long_length'] = long_l
+only_LP['Short_length'] = long_l
+
+only_LP['Sum_angle_short'] = list(map(sum, only_LP['Short_angle']))/only_LP['Short_length']
+only_LP['Sum_angle_long'] = list(map(sum, only_LP['Long_angle']))/only_LP['Long_length']
+only_LP['Long_short_ratio'] = only_LP['Sum_angle_long']/only_LP['Sum_angle_short']
+only_LP.to_csv('processed_LP.csv')
