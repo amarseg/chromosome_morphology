@@ -134,7 +134,7 @@ sns.catplot(x="Chromosome", y="sum_angle",
             height=10, aspect=.7, showfliers=False)
 
 plt.savefig('fig_3d/facet_sum_angle_stage.png')
-#plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
+plot_convex_hull(t, 'EP_MD_4_TIRF- Filtered_Channel Alignment')
 # int_data = only_LP[['Genotype', 'Filename','Angles', 'x_axis', 'Chromosome']]
 # lens = [len(item) for item in int_data['Angles']]
 # df_out = pd.DataFrame( {"Filename" : np.repeat(int_data['Filename'].values,lens),
