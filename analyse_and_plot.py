@@ -198,16 +198,20 @@ def plot_convex_hull(experiment_df, exp_id, convex = False):
     #ax.autoscale()
     subset = experiment_df.loc[experiment_df['Filename'] == 'EP_MD_4_TIRF- Filtered_Channel Alignment']
 
-    for fil in subset['Positions']:
-        fil = np.array(fil)
-        hull = ConvexHull(fil)
-        ax.plot(fil.T[0], fil.T[1], fil.T[2], "ko")
+    fil = np.array(subset['Positions'][0])
+    hull = ConvexHull(fil)
+    ax.plot(fil.T[0], fil.T[1], fil.T[2], "ko")
 
-        if convex:
-            # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
-            for s in hull.simplices:
-                s = np.append(s, s[0])  # Here we cycle back to the first coordinate
-                ax.plot(fil[s, 0], fil[s, 1], fil[s, 2], "r-", alpha=0.2)
+    # for fil in subset['Positions']:
+    #     fil = np.array(fil)
+    #     hull = ConvexHull(fil)
+    #     ax.plot(fil.T[0], fil.T[1], fil.T[2], "ko")
+    #
+    #     if convex:
+    #         # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
+    #         for s in hull.simplices:
+    #             s = np.append(s, s[0])  # Here we cycle back to the first coordinate
+    #             ax.plot(fil[s, 0], fil[s, 1], fil[s, 2], "r-", alpha=0.2)
 
     ax.set_xlabel("X")
     ax.set_xlim(ax.get_xlim()[::-1])
