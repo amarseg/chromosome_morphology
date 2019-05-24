@@ -4,8 +4,10 @@ library(gridExtra)
 library(wesanderson)
 
 lp_data <- read_csv('processed_LP.csv') %>%
-  select( Genotype, Chromosome, Sum_angle_short, Sum_angle_long) %>%
-  gather(key = 'key', value = 'measurement', -Chromosome, -Genotype)
+  select( Genotype, Chromosome, Avg_Long_angle_1, Avg_Short_angle_1,Avg_Around_angle_1,
+          Avg_Long_angle_2, Avg_Short_angle_2,Avg_Around_angle_2) %>%
+  gather(key = 'key', value = 'measurement', -Chromosome, -Genotype) %>%
+  filter(key == 'Avg_Around_angle_1')
   
 
 ggplot(lp_data, aes(x = Chromosome, fill = key, y = measurement)) +
