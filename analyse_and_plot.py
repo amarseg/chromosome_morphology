@@ -353,18 +353,33 @@ def split_lengths_into_short_and_long(df):
 
 def split_chromosome_in_three(df, around = 0.1):
     positions = np.array(df['Positions'])
-    angles = np.array(df['Angles'])
+    angle = np.array(df['Angles'])
     co_pos = np.array(df['Crossover']) - 1
+    co_pos2 = np.array(df['Crossover'])
+
     short = []
     around_points = []
     long = []
-    for i in range(len(positions)):
+
+    short_l = []
+    around_l = []
+    long_l = []
+
+    for i in range(0,len(positions)):
         pos = positions[i]
+        ang = angle[i]
         co = co_pos[i]
-        arm1 = list(pos[0:co])
-        arm2 = list(pos[co+1:len(pos)])
-        l_arm1 = len(arm1)
-        l_arm2 = len(arm2)
+        co2 = co_pos2[i]
+
+        arm1_a = list(ang[0:co])
+        arm2_a = list(ang[co+1:len(pos)])
+        l_arm1 = len(arm1_a)
+        l_arm2 = len(arm2_a)
+
+        arm1 = list(pos[0:co2])
+        arm2 = list(pos[co2+1:len(pos)])
+        len_arm1 = filament_total_distance(arm1)
+        len_arm2 = filament_total_distance(arm2)
 
         pos_around = round(len(pos)*around,0)
         x = int(co-pos_around)
@@ -373,17 +388,24 @@ def split_chromosome_in_three(df, around = 0.1):
         if x < 0:
             x = 0
 
-        angle_around = list(pos[x:y])
+        angle_around = list(ang[x:y])
+        angle_pos = list(pos[x:y])
+        around_length = filament_total_distance(angle_pos)
+        around_l.append(around_length)
         around_points.append(angle_around)
 
         if(l_arm1 > l_arm2):
-            short.append(arm2)
-            long.append(arm1)
+            short.append(arm2_a)
+            short_l.append(len_arm2)
+            long.append(arm1_a)
+            long_l.append(len_arm1)
         else:
-            short.append(arm1)
-            long.append(arm2)
+            short.append(arm1_a)
+            short_l.append(len_arm1)
+            long.append(arm2_a)
+            long_l.append(len_arm2)
 
-    return short, long, around_points
+    return short, long, around_points, short_l, long_l, around_l
 #########################
 #Import and tidy experiment data
 ###########################
@@ -464,23 +486,31 @@ only_LP['Sum_angle_short'] = list(map(sum, only_LP['Short_angle']))/only_LP['Sho
 only_LP['Sum_angle_long'] = list(map(sum, only_LP['Long_angle']))/only_LP['Long_length']
 only_LP['Long_short_ratio'] = only_LP['Sum_angle_long']/only_LP['Sum_angle_short']
 
-short_1, long_1, around_1 = split_chromosome_in_three(only_LP, 0.1)
+short_1, long_1, around_1, short_l1, long_l1, around_l1 = split_chromosome_in_three(only_LP, 0.1)
 only_LP['Long_angle_1'] = long_1
 only_LP['Short_angle_1'] = short_1
 only_LP['Around_angle_1'] = around_1
 
-only_LP['Avg_Long_angle_1'] = list(map(np.mean, only_LP['Long_angle_1']))
-only_LP['Avg_Short_angle_1'] = list(map(np.mean, only_LP['Short_angle_1']))
-only_LP['Avg_Around_angle_1'] = list(map(np.mean, only_LP['Around_angle_1']))
+only_LP['Long_len_1'] = long_l1
+only_LP['Short_len_1'] = short_l1
+only_LP['Around_len_1'] = around_l1
 
-short_2, long_2, around_2 = split_chromosome_in_three(only_LP, 0.2)
+only_LP['Avg_Long_angle_1'] = list(map(sum, only_LP['Long_angle_1']))/only_LP['Long_len_1']
+only_LP['Avg_Short_angle_1'] = list(map(sum, only_LP['Short_angle_1']))/only_LP['Short_len_1']
+only_LP['Avg_Around_angle_1'] = list(map(sum, only_LP['Around_angle_1']))/only_LP['Around_len_1']
+
+short_2, long_2, around_2, short_l2, long_l2, around_l2 = split_chromosome_in_three(only_LP, 0.2)
 only_LP['Long_angle_2'] = long_2
 only_LP['Short_angle_2'] = short_2
 only_LP['Around_angle_2'] = around_2
 
-only_LP['Avg_Long_angle_2'] = list(map(np.mean, only_LP['Long_angle_2']))
-only_LP['Avg_Short_angle_2'] = list(map(np.mean, only_LP['Short_angle_2']))
-only_LP['Avg_Around_angle_2'] = list(map(np.mean, only_LP['Around_angle_2']))
+only_LP['Long_len_2'] = long_l2
+only_LP['Short_len_2'] = short_l2
+only_LP['Around_len_2'] = around_l2
+
+only_LP['Avg_Long_angle_2'] = list(map(sum, only_LP['Long_angle_2']))/only_LP['Long_len_2']
+only_LP['Avg_Short_angle_2'] = list(map(sum, only_LP['Short_angle_2']))/only_LP['Short_len_2']
+only_LP['Avg_Around_angle_2'] = list(map(sum, only_LP['Around_angle_2']))/only_LP['Around_len_2']
 
 only_LP.to_csv('processed_LP.csv')
 
