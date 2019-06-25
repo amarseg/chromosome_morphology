@@ -212,6 +212,7 @@ coh4DG_control_4_1 <- unified_dataset_creator_only_x('coh4_DG/control_coh4_DG/LP
 coh4DG_control_5_1 <- unified_dataset_creator_only_x('coh4_DG/control_coh4_DG/LP/coh4DG_control_5_1_TIRF- Filtered_Channel Alignment_Statistics/',
                                                      genotype = 'control_coh4',
                                                      stage = 'Late Pachytene')
+
 coh4DG_control_6_1 <- unified_dataset_creator_only_x('coh4_DG/control_coh4_DG/LP/coh4DG_control_6_1_TIRF- Filtered_Channel Alignment_Statistics/',
                                                      genotype = 'control_coh4',
                                                      stage = 'Late Pachytene')
@@ -245,4 +246,9 @@ cos_dendrite_dataset <- bind_rows(coh4DG_Auxin4_1_2[[2]], coh4DG_Auxin4_2_2[[2]]
                                   coh4DG_control_1_2[[2]],coh4DG_control_3_3[[2]],coh4DG_control_4_2[[2]],
                                   coh4DG_control_5_2[[2]],coh4DG_control_1_1[[2]],coh4DG_control_3_1[[2]],
                                   coh4DG_control_4_1[[2]],coh4DG_control_5_1[[2]],coh4DG_control_6_1[[2]]) %>%
-  write_csv('cos_dendrites.csv')
+write_csv('cos_dendrites.csv')
+
+
+
+
+
