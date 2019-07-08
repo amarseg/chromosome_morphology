@@ -90,3 +90,8 @@ ggplot(filter(annot_all, segment_n == 1), aes(x = segment_ratio, fill = genotype
   geom_density(alpha = 0.75) +
   facet_wrap(~genotype)
 ggsave('Plots/degron/density_crossover.pdf')
+
+summary_stats <- all_data %>%
+  group_by(stage, genotype) %>%
+  summarise(avg_length = mean(`Filament Length (sum)`), sd_length = sd(`Filament Length (sum)`)) %>%
+  write_csv('summary_chromosome_stats.csv')
