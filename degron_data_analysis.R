@@ -95,3 +95,33 @@ summary_stats <- all_data %>%
   group_by(stage, genotype) %>%
   summarise(avg_length = mean(`Filament Length (sum)`), sd_length = sd(`Filament Length (sum)`)) %>%
   write_csv('summary_chromosome_stats.csv')
+
+
+min_dendrites <- annot_all %>%
+  group_by(file, FilamentID.x, stage, genotype, chromosome) %>%
+  summarise(min_fragment = min(segment_ratio), mean_length = mean(`Filament Length (sum)`))
+
+
+ggplot(min_dendrites, aes(y = min_fragment, x = genotype, fill = genotype))+
+  geom_boxplot() +
+  stat_compare_means( label ="p.signif", ref = 'wt')
+
+ggsave('Plots/degron_signif.pdf')
+
+ggplot(min_dendrites, aes(x = min_fragment, fill = genotype))+
+  geom_histogram(aes(y = ..density..),position = "dodge") +
+  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
+
+ggplot(min_dendrites, aes(x = min_fragment, fill = genotype))+
+  geom_density(alpha = 0.75) +
+  facet_wrap(~chromosome, nrow = 2, ncol = 3) 
+
+
+ggplot(min_dendrites, aes(x = min_fragment, y = mean_length)) +
+  geom_point(aes(colour = genotype)) +
+  facet_wrap(~chromosome) +
+  geom_smooth(method = 'lm', aes(group = genotype,colour = genotype))
+
+ggsave('Plots/relationship_length_CO_degron.pdf')
+
+cor(min_dendrites$min_fragment, min_dendrites$mean_length)

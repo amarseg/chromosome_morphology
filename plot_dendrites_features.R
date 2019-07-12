@@ -99,3 +99,33 @@ p3 <- ggplot(t, aes(x = `Filament Length (sum)`, y =  `Filament Length (sum)2`))
   stat_cor(output.type = 'text')
 
 grid.arrange(p1,p2,p3, ncol = 1, nrow = 3)
+
+
+####################
+#Select smalles fraction for plots and do t-test 
+
+min_dendrites <- annot_dendrites %>%
+  group_by(file, FilamentID.x, stage, genotype, chromosome) %>%
+  summarise(min_fragment = min(segment_ratio), mean_length = mean(`Filament Length (sum)`))
+
+
+ggplot(min_dendrites, aes(y = min_fragment, x = chromosome, fill = genotype))+
+  geom_boxplot() +
+  stat_compare_means( label ="p.signif")
+
+ggsave('Plots/crossover_min_wt.pdf')
+
+ggplot(min_dendrites, aes(x = min_fragment, fill = genotype))+
+  geom_histogram(aes(y = ..density..),position = "dodge") +
+  facet_wrap(~chromosome, nrow = 3, ncol = 1) 
+
+ggplot(min_dendrites, aes(x = min_fragment, fill = genotype))+
+  geom_density(alpha = 0.75) +
+  facet_wrap(~chromosome, nrow = 2, ncol = 3) 
+
+ggplot(min_dendrites, aes(x = min_fragment, y = mean_length)) +
+  geom_point(aes(colour = genotype)) +
+  facet_wrap(~chromosome) +
+  geom_smooth(method = 'lm')
+
+ggsave('Plots/relationship_length_CO.pdf')
