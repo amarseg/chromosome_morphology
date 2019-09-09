@@ -217,6 +217,40 @@ coh4DG_control_6_1 <- unified_dataset_creator_only_x('coh4_DG/control_coh4_DG/LP
                                                      genotype = 'control_coh4',
                                                      stage = 'Late Pachytene')
 
+####################spo11#############
+
+
+spo11_EP_1 <- unified_dataset_creator_only_x('spo11(ok79)/EP/EP6_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics',
+                                                     genotype = 'spo11',
+                                                     stage = 'Early Pachytene')
+
+spo11_EP_2 <- unified_dataset_creator_only_x('spo11(ok79)/EP/EP7_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics',
+                                             genotype = 'spo11',
+                                             stage = 'Early Pachytene')
+
+spo11_EP_3 <- unified_dataset_creator_only_x('spo11(ok79)/EP/EP8_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics',
+                                             genotype = 'spo11',
+                                             stage = 'Early Pachytene')
+
+
+
+spo11_LP_1 <- unified_dataset_creator_only_x('spo11(ok79)/LP/LP1_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics/',
+                                             genotype = 'spo11',
+                                             stage = 'Late Pachytene')
+
+spo11_LP_2 <- unified_dataset_creator_only_x('spo11(ok79)/LP/LP6_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics/',
+                                             genotype = 'spo11',
+                                             stage = 'Late Pachytene')
+
+spo11_LP_3 <- unified_dataset_creator_only_x('spo11(ok79)/LP/LP7_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics/',
+                                             genotype = 'spo11',
+                                             stage = 'Late Pachytene')
+
+
+spo11_LP_4 <- unified_dataset_creator_only_x('spo11(ok79)/LP/LP8_spo11(ok79)_TIRF- Filtered_Channel Alignment_Statistics/',
+                                             genotype = 'spo11',
+                                             stage = 'Late Pachytene')
+
 filament_dataset <- bind_rows(wt_EP_1[[1]],wt_EP_2[[1]],
                               wapl_EP_1[[1]], wapl_EP_2[[1]], 
                               wt_LP_1[[1]],wt_LP_2[[1]],wt_LP_3[[1]],wt_LP_4[[1]], 
@@ -249,6 +283,13 @@ cos_dendrite_dataset <- bind_rows(coh4DG_Auxin4_1_2[[2]], coh4DG_Auxin4_2_2[[2]]
 write_csv('cos_dendrites.csv')
 
 
+spo_filament_dataset <- bind_rows(spo11_EP_1[[1]], spo11_EP_2[[1]],spo11_EP_3[[1]],
+                                  spo11_LP_1[[1]], spo11_LP_2[[1]], spo11_LP_3[[1]], spo11_LP_4[[1]]) %>%
 
+write_csv('Spo_filaments.csv')
+
+spot_dendrite_dataset <- bind_rows(spo11_EP_1[[2]], spo11_EP_2[[2]],spo11_EP_3[[2]],
+                                   spo11_LP_1[[2]], spo11_LP_2[[2]], spo11_LP_3[[2]], spo11_LP_4[[2]]) %>%
+write_csv('spot_dendrites.csv')
 
 

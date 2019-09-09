@@ -15,7 +15,7 @@ degron_data <- read_csv('cos_filaments.csv') %>%
 ggplot(degron_data, aes(x = genotype, y = `Filament Length (sum)`)) +
   geom_boxplot() +
   facet_wrap(~stage) +
-  stat_compare_means(method = )
+  stat_compare_means()
 
 ggplot(degron_data, aes(x = stage, y = `Filament Length (sum)`)) +
   geom_boxplot() +
