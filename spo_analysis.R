@@ -16,9 +16,11 @@ ggplot(all_data, aes(y = `Filament Length (sum)`, x = genotype)) +
 
 ggplot(all_data, aes(y = `Filament Length (sum)`, x = stage)) +
   geom_boxplot() +
-  facet_wrap(~genotype)+
-  stat_compare_means( label ="p.signif", ref.group = 'EP')
+  facet_wrap(~genotype)
 
 only_wt <- read_csv('all_filaments_2.csv') %>%
   filter(chromosome == 'chr_X' & genotype == 'wt')
 
+ggplot(filter(all_data, genotype != 'wapl'), aes(x = `Filament Length (sum)`, fill = genotype)) +
+  geom_histogram(position = position_dodge()) +
+  facet_wrap(~stage)
