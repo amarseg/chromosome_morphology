@@ -70,7 +70,10 @@ for(i in 1:nrow(all_data_paths))
                                  stage = all_data_paths$stage[i])
 }
   
-thing <- data_list %>%
-  map(1) %>%
+filament <- lapply(data_list, function(x){x[[1]]}) %>%
   bind_rows() %>%
   write_csv('all_data_from_public.csv')
+
+dendrite <- lapply(data_list, function(x){x[[2]]}) %>%
+  bind_rows() %>%
+  write_csv('all_dendrite_from_public.csv')
