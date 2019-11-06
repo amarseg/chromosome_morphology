@@ -4,7 +4,7 @@ unified_dataset_creator_only_x <- function(file_path, genotype, stage)
   
   file_names <- list.files(file_path, full.names = T) 
   
-  dendrites <- grep(file_names, pattern = 'Alignment_Dendrite', fixed = T, value = T)
+  dendrites <- grep(file_names, pattern = 'Dendrite', fixed = T, value = T)
   segments <- grep(file_names, pattern = 'Filament', fixed = T, value = T)
   
   nu_segments <- grep(segments, pattern = 'Dendrite_Branches|Sholl_Intersections', value = T, invert = T)
@@ -77,3 +77,38 @@ filament <- lapply(data_list, function(x){x[[1]]}) %>%
 dendrite <- lapply(data_list, function(x){x[[2]]}) %>%
   bind_rows() %>%
   write_csv('all_dendrite_from_public.csv')
+
+
+new_imaris_data <- list.dirs(path = 'X:/Amalia/EXCEL_FinalResults/', recursive = T) %>%
+  enframe(name = NULL) %>%
+  filter(str_detect(value, pattern = 'Channel') & !str_detect(value, pattern = 'aco')) %>%
+  mutate(stage = case_when(
+    str_detect(value, 'EP') ~ 'Early Pachytene',
+    str_detect(value, 'LP') ~ 'Late Pachytene'
+  )) %>%
+  mutate(base = basename(value)) %>%
+  mutate(genotype = str_split(base, '-')) %>%
+  unnest() %>%
+  filter(!str_detect(genotype,'Channel')) %>%
+  mutate(genotype = str_sub(genotype, start = 1, end = -5)) %>%
+  mutate(genotype = case_when(
+    str_detect(genotype, 'coh4') ~ str_sub(genotype, start = 1, end = -5),
+    str_detect(genotype, 'cosa1_') ~ str_sub(genotype, start = 1, end = -6),
+    TRUE ~ str_sub(genotype, start = 4)
+  ))
+
+data_list <- list()
+for(i in 1:nrow(new_imaris_data))
+{
+  data_list[[i]] <- unified_dataset_creator_only_x(file_path = new_imaris_data$value[i],
+                                                   genotype = new_imaris_data$genotype[i],
+                                                   stage = new_imaris_data$stage[i])
+}
+
+filament <- lapply(data_list, function(x){x[[1]]}) %>%
+  bind_rows() %>%
+  write_csv('all_data_from_public2.csv')
+
+dendrite <- lapply(data_list, function(x){x[[2]]}) %>%
+  bind_rows() %>%
+  write_csv('all_dendrite_from_public2.csv')
